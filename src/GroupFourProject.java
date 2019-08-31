@@ -11,6 +11,7 @@ import java.util.TimerTask;
 
 public class GroupFourProject extends PApplet {
     private enum ScreenState {
+        LOCKOUT,
         BEGIN,
         CS_QUESTION,
         PASSWORD,
@@ -21,12 +22,13 @@ public class GroupFourProject extends PApplet {
 
     private static GroupFourProject app = new GroupFourProject();
     private static int maxTime = 1800;
-    private static int currentTime = 0;
+    private static int currentTime = maxTime;
 
     private static String password = "7361";
     private static String input = "";
     private static String timeText = "";
     private static boolean quitOnEscape = false;
+    private static boolean properQuit = true;
 
     private static ScreenState gameState = ScreenState.BEGIN;
     private static Button submitButton;
@@ -81,6 +83,12 @@ public class GroupFourProject extends PApplet {
 
     @Override public void draw() {
         switch(gameState) {
+            case LOCKOUT:
+                background(0);
+                textSize(30);
+                fill(255, 0, 0);
+                text("You have been locked out for attempting to cheat. Begone, fools. Academic dishonesty is a crime!", width/48.0f, height/2.0f, width - width/48.0f, height - height/90.0f);
+                break;
             case BEGIN:
                 background(0);
                 fill(PApplet.unhex(GConstants.HACKER_GREEN));
@@ -89,7 +97,7 @@ public class GroupFourProject extends PApplet {
                         "\n" +
                         "This is bad. Like, real bad. I can’t think of a way out of this...unless...no. It could never work...and I come from light...but could I? My EE is predicted an E, and I have a 2 in every science...if I could just convince my teachers to boost my predicteds, and hack into Ms. Pfantz’ ManageBac, all would be well. I’m pretty sure her password is only 4 numbers long…\n" +
                         "\n" +
-                        "Ah, crud, why are there so many emails in my inbox? From all the science teachers? Failing...failing...failing—wait! All of them are offering me a second chance! Guess I have to put my Netflix on hold for a bit. What’s this? “The science department met, and you need to prove to us that you aren’t going to fail. Solve these questions—each answer leads to the next—and you’ll pass.” Seems a little...I dunno, contrived, but okay, fine! [Shift to switch between screens, time starts when you hit next!]", 10, 10, width - width/48.0f, height - height/90.0f);
+                        "Ah, crud, why are there so many emails in my inbox? From all the science teachers? Failing...failing...failing—wait! All of them are offering me a second chance! Guess I have to put my Netflix on hold for a bit. What’s this? “The science department met, and you need to prove to us that you aren’t going to fail. Solve these questions—each answer leads to the next—and you’ll pass.” Seems a little...I dunno, contrived, but okay, fine! [Hints trigger at certain time intervals, time starts when you hit next, shift to tab between screens!]", 10, 10, width - width/48.0f, height - height/90.0f);
                 nextButton.draw();
                 break;
             case PASSWORD:
@@ -211,6 +219,7 @@ public class GroupFourProject extends PApplet {
                break;
            case FAILURE:
                if(quitButton.isSelected()) {
+                   properQuit = true;
                    System.exit(0);
                }
                break;
@@ -236,7 +245,44 @@ public class GroupFourProject extends PApplet {
         return null;
     }
 
+    public static void setupLockoutState() {
+        System.out.println("LS");
+        try {
+            BufferedReader b = new BufferedReader(new FileReader(new File("data" + File.separator + "status.txt")));
+            String l;
+            while((l = b.readLine()) != null) {
+                System.out.println(l);
+                if(l.trim().equals("0")) {
+                    properQuit = true;
+                } else if(l.trim().equals("1")){
+                    properQuit = false;
+                } else {
+                    properQuit = true;
+                }
+            }
+            b.close();
+        } catch(IOException e) {
+            System.out.println(":(((");
+        }
+    }
+
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            if (gameState != ScreenState.SUCCESS && gameState != ScreenState.FAILURE) {
+                try {
+                    BufferedWriter w = new BufferedWriter(new FileWriter(new File("data" + File.separator + "status.txt")));
+                    w.write("1");
+                    w.close();
+                } catch (IOException e) {
+                    System.out.println(":(((");
+                }
+            }
+        }));
+
+        setupLockoutState();
+        if(!properQuit) {
+            gameState = ScreenState.LOCKOUT;
+        }
         PApplet.runSketch(new String[]{"Group Four"}, app);
     }
 }
