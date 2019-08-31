@@ -41,7 +41,7 @@ public class GroupFourProject extends PApplet {
 
     private static String[] hints = {
             "CS: Only one of the outputs should be on…!",
-            "Physics: Inertia is the correct name for this phenomenon...if you’re forcing the answer out of me!",
+            "Physics: It's the opposite of 'centripetal'...if you’re forcing the answer out of me!",
             "Chemistry: M = mRT/pV",
             "Biology: This structure will make sure you don’t go hungry...even though it sounds like a super villain!"
     };
@@ -155,7 +155,7 @@ public class GroupFourProject extends PApplet {
                         "\n" +
                         "I need to send him back the correct output converted into decimal, though? I’m gonna need your help for that one…hey, if you add the digits of that number, it’ll probably be the first digit to Ms. Pfantz’ ManageBac password!\n" +
                         "\n" +
-                        "I also have a weird suspicion that subtracting factors of the decimal from itself will help me master physics too, so do that once you’re done and search the room for that number.", 10, 100, width - width/48.0f, height - height/90.0f);
+                        "I also have a weird suspicion that subtracting the sum of the digits from the sum of the factors of the decimal number will help me master physics too, so do that once you’re done and search the room for that number.", 10, 100, width - width/48.0f, height - height/90.0f);
                 fill(255, 0, 0);
                 textSize(80);
                 text(timeText, width - textWidth(timeText), height / 10.0f);
@@ -179,11 +179,6 @@ public class GroupFourProject extends PApplet {
                 case 57:
                     if (input.length() != 4) input += (event.getKey());
                     break;
-                case 27:
-                    if (!quitOnEscape) {
-                        key = 0;
-                    }
-                    break;
                 case 8:
                     if (input.length() > 0) input = input.substring(0, input.length() - 1);
                     break;
@@ -196,6 +191,12 @@ public class GroupFourProject extends PApplet {
                 gameState = ScreenState.CS_QUESTION;
             } else if (gameState == ScreenState.CS_QUESTION) {
                 gameState = ScreenState.PASSWORD;
+            }
+        }
+
+        if(event.getKeyCode() == 27 || event.getKeyCode() == 9) {
+            if (!quitOnEscape) {
+                key = 0;
             }
         }
     }
@@ -228,7 +229,7 @@ public class GroupFourProject extends PApplet {
 
     public static void logScore() {
         try {
-            PrintWriter p  = new PrintWriter(new BufferedWriter(new FileWriter(new File("data" + File.separator + "scores.txt"))));
+            PrintWriter p  = new PrintWriter(new BufferedWriter(new FileWriter(new File("data" + File.separator + "scores.txt"), true)));
             p.println(currentTime);
             p.close();
         } catch(IOException e) {
